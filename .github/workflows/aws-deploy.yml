@@ -1,0 +1,40 @@
+name: Deploy Secure Cloud API to AWS
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "cloud/**"
+      - ".github/workflows/aws-deploy.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ vars.AWS_DEPLOY_ROLE_ARN != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'ap-south-1' }}
+
+      - name: Setup SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: Build
+        working-directory: cloud
+        run: |
+          npm install
+          sam build
+
+      - name: Deploy
+        working-directory: cloud
+        run: |
+          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name secure-cloud-api --capabilities CAPABILITY_IAM --resolve-s3
