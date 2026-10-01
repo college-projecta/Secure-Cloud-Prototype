@@ -46,7 +46,7 @@ function enableWorkspace(enabled){verifyBtn.disabled=!enabled;downloadBtn.disabl
 fileInput.addEventListener("change",()=>handleFile(fileInput.files[0]));
 async function handleFile(file){
  selectedFile=file||null;fileLabel.textContent=file?file.name:"Drop a file here";processBtn.disabled=!file;
- if(file){metric("originalSize",formatBytes(file.size));setStatus("File ready. Encryption will run locally.","success")}
+ if(file){metric("originalSize",formatBytes(file.size));const meta=$("fileMeta");if(meta){meta.hidden=false;$("fileMetaName").textContent=file.name;$("fileMetaSize").textContent=formatBytes(file.size)}progress(5);setStatus("File ready. Encryption will run locally.","success")}
 }
 ["dragenter","dragover"].forEach(evt=>dropzone.addEventListener(evt,e=>{e.preventDefault();dropzone.classList.add("drag")}));
 ["dragleave","drop"].forEach(evt=>dropzone.addEventListener(evt,e=>{e.preventDefault();dropzone.classList.remove("drag")}));
@@ -55,18 +55,18 @@ dropzone.addEventListener("drop",e=>handleFile(e.dataTransfer.files[0]));
 processBtn.addEventListener("click",async()=>{
  if(!selectedFile)return;
  const size=Number(blockSizeInput.value);
- processBtn.disabled=true;enableWorkspace(false);setStatus("Generating key and encrypting file…","working");
+ processBtn.disabled=true;enableWorkspace(false);progress(15);setStatus("Generating a local key and encrypting your file…","working");
  try{
    const encrypted=await encryptFile(selectedFile);
    check("checkEncrypt",true,"AES-256-GCM completed");
    setStatus("Ciphertext created. Building ordered encrypted blocks…","working");
-   const blocks=await buildBlocks(encrypted.ciphertext,size);
+   progress(55);const blocks=await buildBlocks(encrypted.ciphertext,size);progress(80);
    state={...encrypted,blocks,blockSize:size,ciphertextHash:await digestHex(encrypted.ciphertext),tampered:false};
    renderBlocks(blocks);
    metric("encryptedSize",formatBytes(encrypted.ciphertext.byteLength));metric("blockCount",blocks.length);metric("effectiveBlockSize",formatBytes(size));
    check("checkSegment",true,blocks.length+" ordered blocks");
    check("checkIntegrity",true,"SHA-256 block map ready");
-   enableWorkspace(true);tamperLab.classList.remove("hidden");
+   enableWorkspace(true);tamperLab.classList.remove("hidden");progress(100);
    setStatus("Encryption and segmentation completed successfully.","success");
  }catch(err){console.error(err);setStatus("Pipeline failed: "+err.message,"error");}
  finally{processBtn.disabled=false}
