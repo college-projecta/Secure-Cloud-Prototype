@@ -70,7 +70,7 @@ processBtn.addEventListener("click",async()=>{
    check("checkSegment",true,totalBlocks+" encrypted blocks");
    check("checkIntegrity",true,"SHA-256 fingerprints ready");
    renderBlocks(blocks);
-   metric("encryptedSize",formatBytes(ciphertext.byteLength));metric("blockCount",blocks.length);metric("effectiveBlockSize",formatBytes(size));
+   metric("encryptedSize",formatBytes(blocks.reduce((total,b)=>total+b.data.byteLength,0)));metric("blockCount",blocks.length);metric("effectiveBlockSize",formatBytes(size));
    enableWorkspace(true);tamperLab.classList.remove("hidden");progress(100);
    setStatus("Encryption completed. Your encrypted blocks are ready to verify or restore.","success");
  }catch(err){console.error(err);setStatus("Pipeline failed: "+err.message,"error");}
