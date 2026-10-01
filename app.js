@@ -5,7 +5,7 @@ const statusBadge=$("statusBadge"),statusText=$("statusText"),blockList=$("block
 const tamperLab=$("tamperLab"),tamperBtn=$("tamperBtn");
 let selectedFile=null,state=null;
 
-const MAX_DEMO_SIZE=100*1024*1024;
+const MAX_DEMO_SIZE=10*1024*1024*1024;
 const formatBytes=b=>{if(!Number.isFinite(b))return"—";if(b<1024)return b+" B";const u=["KB","MB","GB"],v0=b/1024;let v=v0,i=0;while(v>=1024&&i<u.length-1){v/=1024;i++}return v.toFixed(v>=10?1:2)+" "+u[i]};
 const shortHash=h=>h.slice(0,10)+"…"+h.slice(-8);
 const setStatus=(text,kind="")=>{statusText.textContent=text;statusBadge.textContent=kind==="success"?"SECURE":kind==="error"?"ALERT":kind==="working"?"WORKING":"IDLE";statusBadge.className="badge "+kind};
@@ -37,7 +37,7 @@ async function handleFile(file){
    metric("originalSize",formatBytes(file.size));
    const meta=$("fileMeta");if(meta){meta.hidden=false;$("fileMetaName").textContent=file.name;$("fileMetaSize").textContent=formatBytes(file.size)}
    progress(5);
-   if(file.size>MAX_DEMO_SIZE){setStatus("Demo limit is 100 MB. Choose a smaller file for fast browser processing.","error");processBtn.disabled=true;return}
+   if(file.size>MAX_DEMO_SIZE){setStatus("Maximum demo size is 10 GB.","error");processBtn.disabled=true;return}
    setStatus("File ready. Fast block encryption will run locally.","success");
  }
 }
@@ -53,19 +53,19 @@ processBtn.addEventListener("click",async()=>{
  setStatus("Generating a local AES-256 key…","working");
  try{
    const key=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
-   const source=new Uint8Array(await selectedFile.arrayBuffer());
-   const totalBlocks=Math.ceil(source.byteLength/size);
+   const totalBlocks=Math.ceil(selectedFile.size/size);
    const blocks=[];
    for(let i=0;i<totalBlocks;i++){
-     const plain=source.subarray(i*size,Math.min(source.byteLength,(i+1)*size));
+     const start=i*size,end=Math.min(selectedFile.size,(i+1)*size);
+     const plain=new Uint8Array(await selectedFile.slice(start,end).arrayBuffer());
      const iv=crypto.getRandomValues(new Uint8Array(12));
      const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv,tagLength:128},key,plain));
      blocks.push({index:i+1,data:encrypted,iv,hash:await digestHex(encrypted),plainSize:plain.byteLength});
      progress(10+((i+1)/totalBlocks)*75);
      if(i%2===0)await yieldToBrowser();
    }
-   const ciphertext=concatBlocks(blocks.map(b=>b.data));
-   state={key,blocks,blockSize:size,ciphertextHash:await digestHex(ciphertext),originalName:selectedFile.name,originalType:selectedFile.type||"application/octet-stream",originalSize:selectedFile.size,tampered:false};
+   const ciphertextHash=await digestHex(concatBlocks(blocks.map(b=>b.data)));
+   state={key,blocks,blockSize:size,ciphertextHash,originalName:selectedFile.name,originalType:selectedFile.type||"application/octet-stream",originalSize:selectedFile.size,tampered:false};
    check("checkEncrypt",true,"AES-256-GCM encrypted block-by-block");
    check("checkSegment",true,totalBlocks+" encrypted blocks");
    check("checkIntegrity",true,"SHA-256 fingerprints ready");
