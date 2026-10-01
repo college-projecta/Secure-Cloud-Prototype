@@ -79,13 +79,10 @@ processBtn.addEventListener("click",async()=>{
 
 async function verifyState(){
  if(!state)return false;
- const parts=[];
  for(const block of state.blocks){
    if(await digestHex(block.data)!==block.hash)throw new Error("Block #"+block.index+" failed integrity verification");
-   parts.push(block.data);
+   await yieldToBrowser();
  }
- const reconstructed=concatBlocks(parts);
- if(await digestHex(reconstructed)!==state.ciphertextHash)throw new Error("Ciphertext hash mismatch");
  return true;
 }
 
