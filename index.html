@@ -82,7 +82,9 @@
       </div>
       <div class="blocks-header"><span>ENCRYPTED BLOCK MAP</span><span id="blockSummary">—</span></div>
       <div id="blockList" class="block-list"><div class="empty-blocks">Blocks will appear here after encryption.</div></div>
-      <div class="result-actions"><button id="verifyBtn" class="btn btn-secondary" disabled>Verify reconstruction</button><button id="downloadBtn" class="btn btn-primary" disabled>Download decrypted file</button></div>
+      <div class="restore-flow" aria-label="Restore flow"><span>Encrypted blocks</span><b>→</b><span>Reconstruct</span><b>→</b><span>Verify</span><b>→</b><strong>🔓 Decrypt</strong><b>→</b><strong>Download original</strong></div>
+      <div class="result-actions"><button id="verifyBtn" class="btn btn-secondary" disabled>✓ Verify & reconstruct</button><button id="downloadBtn" class="btn btn-primary" disabled>🔓 Decrypt & download original</button></div>
+      <p class="restore-note">After verification, the encrypted blocks are reconstructed and authenticated in your browser. The original file is then decrypted and downloaded to your device.</p>
       <button id="packageBtn" class="btn btn-outline full" disabled>Export encrypted package (.json)</button>
     </div>
   </div>
