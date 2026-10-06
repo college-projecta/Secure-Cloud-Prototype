@@ -24,11 +24,11 @@
 <main>
 <section id="home" class="hero wrap">
   <div class="hero-copy">
-    <div class="status-pill"><span></span> CLIENT-SIDE ENCRYPTION • OPEN DEMO</div>
+    <div class="status-pill"><span></span> CLIENT-SIDE ENCRYPTION • PRIVACY-FIRST DEMO</div>
     <h1>Your files.<br><em>Encrypted before</em><br>they leave the browser.</h1>
     <p class="hero-lead">A cloud-ready secure storage laboratory built around AES-256-GCM, encrypted block segmentation, integrity verification and CDN delivery.</p>
-    <div class="hero-actions"><a class="btn btn-primary" href="#workspace">Open secure workspace <span>→</span></a><a class="text-link" href="#architecture">Explore architecture</a></div>
-    <div class="trust-row"><span>◆ Web Crypto API</span><span>◆ AES-256-GCM</span><span>◆ Zero file upload in demo</span></div>
+    <div class="hero-actions"><a class="btn btn-primary" href="#workspace">Open secure workspace <span>→</span></a><a class="text-link" href="#architecture">See how files stay protected</a></div>
+    <div class="trust-row"><span>◆ Web Crypto API</span><span>◆ AES-256-GCM</span><span>◆ Key stays in browser memory</span><span>◆ No plaintext upload</span></div>
   </div>
   <div class="hero-visual">
     <div class="orb"></div>
@@ -70,12 +70,12 @@
 
     <div class="glass panel result-panel">
       <div class="panel-title"><div><span class="step-tag">STEP 02–04</span><h3>Security telemetry</h3></div><span id="statusBadge" class="badge">IDLE</span></div>
-      <div id="statusText" class="status-message">Select a file to initialize the secure pipeline.</div><div class="progress-wrap" aria-label="Encryption progress"><div class="progress-track"><div id="progressBar" class="progress-bar" style="width:0%"></div></div><span id="progressValue">0%</span></div>
+      <div id="statusText" class="status-message">Select a file to initialize the secure pipeline.</div><div id="secureResult" class="secure-result" hidden><div class="secure-result-icon">✓</div><div><span class="kicker">PROTECTION COMPLETE</span><strong>Encrypted payload ready</strong><small>Your original file was processed locally. Download is available after integrity verification.</small></div><span class="ready-badge">READY</span></div><div class="progress-wrap" aria-label="Encryption progress"><div class="progress-track"><div id="progressBar" class="progress-bar" style="width:0%"></div></div><span id="progressValue">0%</span></div>
       <div class="telemetry">
         <div><span>Original</span><strong id="originalSize">—</strong></div><div><span>Ciphertext</span><strong id="encryptedSize">—</strong></div>
         <div><span>Blocks</span><strong id="blockCount">—</strong></div><div><span>Block size</span><strong id="effectiveBlockSize">—</strong></div>
       </div>
-      <div class="security-checks">
+      <div class="security-strip"><span>🔐 Plaintext stays local</span><span>🛡 Authenticated blocks</span><span>🧠 Key in memory only</span></div><div class="security-checks">
         <div id="checkEncrypt"><span>○</span><p><b>Encryption</b><small>Waiting for input</small></p></div>
         <div id="checkSegment"><span>○</span><p><b>Segmentation</b><small>Waiting for encryption</small></p></div>
         <div id="checkIntegrity"><span>○</span><p><b>Integrity verification</b><small>Waiting for reconstruction</small></p></div>
@@ -107,7 +107,7 @@
 </div>
 </section>
 
-<section id="security" class="section wrap">
+<section id="security" class="section wrap"><div class="security-hero glass"><div><span class="kicker">FILE SAFETY PROMISE</span><h3>Your file is protected before cloud storage ever sees it.</h3><p>The demo encrypts the selected file inside your browser. A future cloud backend should store ciphertext only, use private objects, short-lived access URLs and per-user authorization.</p></div><div class="safety-list"><span>✓ Original plaintext stays on device during encryption</span><span>✓ AES-256-GCM authentication rejects modified ciphertext</span><span>✓ Random IV is generated per encrypted block</span><span>✓ Encryption key is kept in browser memory and is not exported</span></div></div>
   <div class="section-head"><div><span class="kicker">03 / SECURITY MODEL</span><h2>Security by design</h2></div><p>The prototype demonstrates cryptographic primitives without pretending that encryption alone equals a production security program.</p></div>
   <div class="security-grid">
     <article><span class="feature-icon">◇</span><h3>Authenticated encryption</h3><p>AES-GCM protects confidentiality and detects ciphertext modification through its authentication tag.</p><span class="feature-meta">AES-256-GCM</span></article>
