@@ -64,15 +64,15 @@ processBtn.addEventListener("click",async()=>{
      progress(10+((i+1)/totalBlocks)*75);
      if(i%2===0)await yieldToBrowser();
    }
-   const ciphertextHash=await digestHex(concatBlocks(blocks.map(b=>b.data)));
-   state={key,blocks,blockSize:size,ciphertextHash,originalName:selectedFile.name,originalType:selectedFile.type||"application/octet-stream",originalSize:selectedFile.size,tampered:false};
+   const manifestHash=await digestHex(new TextEncoder().encode(blocks.map(b=>b.hash).join("|")));
+   state={key,blocks,blockSize:size,manifestHash,originalName:selectedFile.name,originalType:selectedFile.type||"application/octet-stream",originalSize:selectedFile.size,tampered:false};
    check("checkEncrypt",true,"AES-256-GCM encrypted block-by-block");
    check("checkSegment",true,totalBlocks+" encrypted blocks");
    check("checkIntegrity",true,"SHA-256 fingerprints ready");
    renderBlocks(blocks);
    metric("encryptedSize",formatBytes(blocks.reduce((total,b)=>total+b.data.byteLength,0)));metric("blockCount",blocks.length);metric("effectiveBlockSize",formatBytes(size));
    enableWorkspace(true);tamperLab.classList.remove("hidden");progress(100);
-   setStatus("Encryption completed. Your encrypted blocks are ready to verify or restore.","success");
+   const resultCard=$("secureResult");if(resultCard)resultCard.hidden=false;setStatus("Encryption completed. Verify the encrypted blocks to unlock a trusted download.","success");
  }catch(err){console.error(err);setStatus("Pipeline failed: "+err.message,"error");}
  finally{processBtn.disabled=false}
 });
@@ -89,7 +89,7 @@ async function verifyState(){
 verifyBtn.addEventListener("click",async()=>{
  if(!state)return;
  setStatus("Verifying encrypted blocks…","working");
- try{await verifyState();check("checkIntegrity",true,"All encrypted blocks verified");setStatus("Integrity verification passed. Payload is unchanged.","success")}
+ try{await verifyState();check("checkIntegrity",true,"All encrypted blocks verified");const resultCard=$("secureResult");if(resultCard)resultCard.querySelector("small").textContent="All encrypted blocks passed integrity verification. Your original file is ready to decrypt.";setStatus("Integrity verification passed. Secure download is ready.","success")}
  catch(err){check("checkIntegrity",false,err.message);setStatus("Integrity verification failed: "+err.message,"error")}
 });
 
@@ -118,7 +118,7 @@ packageBtn.addEventListener("click",async()=>{
  if(!state)return;
  try{
    await verifyState();
-   const manifest={format:"secure-cloud-cipher-package",version:2,createdAt:new Date().toISOString(),algorithm:"AES-256-GCM-per-block",tagBits:128,blockSize:state.blockSize,originalFile:{name:state.originalName,type:state.originalType,size:state.originalSize},ciphertextSha256:state.ciphertextHash,blocks:state.blocks.map(b=>({index:b.index,size:b.data.byteLength,plainSize:b.plainSize,ivBase64:btoa(String.fromCharCode(...b.iv)),sha256:b.hash,dataBase64:bytesToBase64(b.data)})),keyHandling:"Encryption key remains in browser memory and is intentionally not exported."};
+   const manifest={format:"secure-cloud-cipher-package",version:2,createdAt:new Date().toISOString(),algorithm:"AES-256-GCM-per-block",tagBits:128,blockSize:state.blockSize,originalFile:{name:state.originalName,type:state.originalType,size:state.originalSize},manifestSha256:state.manifestHash,blocks:state.blocks.map(b=>({index:b.index,size:b.data.byteLength,plainSize:b.plainSize,ivBase64:btoa(String.fromCharCode(...b.iv)),sha256:b.hash,dataBase64:bytesToBase64(b.data)})),keyHandling:"Encryption key remains in browser memory and is intentionally not exported."};
    const blob=new Blob([JSON.stringify(manifest,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
    a.href=url;a.download=state.originalName+".secure-cloud.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
    setStatus("Encrypted package exported. Secret key was not exported.","success");
