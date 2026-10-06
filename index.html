@@ -15,8 +15,11 @@
 <div class="bg-grid"></div>
 <header class="nav">
   <a class="logo" href="#home" aria-label="Secure Cloud home"><span class="logo-mark">S</span><span>SECURE<span class="logo-muted">CLOUD</span></span></a>
-  <nav aria-label="Primary navigation">
-    <a href="#workspace">Workspace</a><a href="#architecture">Architecture</a><a href="#security">Security</a><a href="#docs">Docs</a>
+  <nav class="product-nav" aria-label="Primary navigation">
+    <a class="nav-link active" href="#workspace"><span class="nav-index">01</span><span><b>Workspace</b><small>Encrypt & verify</small></span></a>
+    <a class="nav-link" href="#architecture"><span class="nav-index">02</span><span><b>Architecture</b><small>System design</small></span></a>
+    <a class="nav-link" href="#security"><span class="nav-index">03</span><span><b>Security</b><small>Protection model</small></span></a>
+    <a class="nav-link" href="#docs"><span class="nav-index">04</span><span><b>Docs</b><small>Implementation</small></span></a>
   </nav>
   <a class="nav-cta" href="#workspace">Launch workspace <span>↗</span></a>
 </header>
@@ -130,3 +133,15 @@
 <script src="app-v3.js"></script>
 </body>
 </html>
+<style>
+.product-nav{display:flex;align-items:center;gap:6px}
+.nav-link{position:relative;display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid transparent;border-radius:12px;color:#8fa8b8!important;text-decoration:none!important;transition:.2s ease}
+.nav-link:hover,.nav-link.active{color:#e7fbff!important;background:rgba(8,47,73,.32);border-color:rgba(103,232,249,.14);box-shadow:inset 0 0 18px rgba(34,211,238,.035)}
+.nav-link b{display:block;font-size:12px;line-height:1.1;font-weight:700}
+.nav-link small{display:block;margin-top:3px;font-size:9px;color:#6f8798;letter-spacing:.04em}
+.nav-link.active small,.nav-link:hover small{color:#8fddea}
+.nav-index{font:700 9px/1 "Space Grotesk",sans-serif;color:#4e6a7a;align-self:flex-start;padding-top:2px}
+.nav-link.active .nav-index{color:#67e8f9;text-shadow:0 0 10px rgba(103,232,249,.5)}
+@media(max-width:980px){.product-nav{gap:2px}.nav-link{padding:8px 7px}.nav-link small{display:none}.nav-index{display:none}}
+@media(max-width:720px){.product-nav{display:none}}
+</style>
