@@ -11,7 +11,7 @@ const shortHash=h=>h.slice(0,10)+"…"+h.slice(-8);
 const setStatus=(text,kind="")=>{statusText.textContent=text;statusBadge.textContent=kind==="success"?"SECURE":kind==="error"?"ALERT":kind==="working"?"WORKING":"IDLE";statusBadge.className="badge "+kind};
 const metric=(id,value)=>$(id).textContent=value;
 const check=(id,ok,text)=>{const el=$(id);el.classList.toggle("ok",ok);el.classList.toggle("bad",!ok);el.querySelector("span").textContent=ok?"✓":"○";el.querySelector("small").textContent=text};
-const progress=value=>{const bar=$("progressBar");if(bar)bar.style.width=Math.max(0,Math.min(100,value))+"%";const valueEl=$("progressValue");if(valueEl)valueEl.textContent=Math.round(value)+"%"};
+let lastProgress=-1;const progress=value=>{const v=Math.max(0,Math.min(100,Math.round(value)));if(v===lastProgress)return;lastProgress=v;const bar=$("progressBar");if(bar)bar.style.width=v+"%";const valueEl=$("progressValue");if(valueEl)valueEl.textContent=v+"%"};
 const yieldToBrowser=()=>new Promise(resolve=>setTimeout(resolve,0));
 
 async function digestHex(bytes){const hash=await crypto.subtle.digest("SHA-256",bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("")}
@@ -62,7 +62,7 @@ processBtn.addEventListener("click",async()=>{
      const encrypted=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv,tagLength:128},key,plain));
      blocks.push({index:i+1,data:encrypted,iv,hash:await digestHex(encrypted),plainSize:plain.byteLength});
      progress(10+((i+1)/totalBlocks)*75);
-     if(i%2===0)await yieldToBrowser();
+     if((i&7)===0)await yieldToBrowser();
    }
    const manifestHash=await digestHex(new TextEncoder().encode(blocks.map(b=>b.hash).join("|")));
    state={key,blocks,blockSize:size,manifestHash,originalName:selectedFile.name,originalType:selectedFile.type||"application/octet-stream",originalSize:selectedFile.size,tampered:false};
